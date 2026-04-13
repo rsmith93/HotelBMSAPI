@@ -9,5 +9,7 @@ namespace HotelBMSRepository.Interfaces
 {
     public interface IBookingRepository
     {
+        Guid CreateBooking(Booking entity);
+        Booking GetBookingByBookingRef(Guid bookingID);
     }
 }

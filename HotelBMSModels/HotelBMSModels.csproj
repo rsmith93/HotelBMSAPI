@@ -6,9 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\HotelBMSData\HotelBMSData.csproj" />
-    <ProjectReference Include="..\HotelBMSModels\HotelBMSModels.csproj" />
-  </ItemGroup>
-
 </Project>

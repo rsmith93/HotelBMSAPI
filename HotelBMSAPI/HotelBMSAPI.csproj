@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HotelBMSData\HotelBMSData.csproj" />
+    <ProjectReference Include="..\HotelBMSServices\HotelBMSServices.csproj" />
   </ItemGroup>
 
 </Project>
