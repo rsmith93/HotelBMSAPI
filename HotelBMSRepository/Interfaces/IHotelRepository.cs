@@ -10,5 +10,6 @@ namespace HotelBMSRepository.Interfaces
     public interface IHotelRepository
     {
         IQueryable<Hotel> GetHotelByName(string name);
+        IQueryable<Hotel> GetAllAvailableHotels();
     }
 }

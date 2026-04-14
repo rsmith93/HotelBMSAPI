@@ -21,7 +21,21 @@ namespace HotelBMSRepository
 
         public IQueryable<Hotel> GetHotelByName(string name)
         {
-            var hotels = dbContext.Hotels.AsNoTracking().Where(x => !x.Archived && x.Name.ToLower().Trim().Contains(name)).OrderBy(x => x.Name);
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentNullException("Name should not be null or empty");
+
+            var hotels = dbContext.Hotels.AsNoTracking()
+                .Where(x => !x.Archived && 
+                            x.Name.ToLower().Trim().Contains(name.ToLower().Trim()))
+                .OrderBy(x => x.Name);
+            return hotels;
+        }
+
+        public IQueryable<Hotel> GetAllAvailableHotels()
+        {
+            var hotels = dbContext.Hotels.AsNoTracking()
+                .Where(x => !x.Archived)
+                .OrderBy(x => x.Name);
             return hotels;
         }
 

@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using HotelBMSData.Entities;
 
 namespace HotelBMSRepository.Interfaces
 {
-    public interface IBookingRepository
+    public interface IDbSeedRepository
     {
-        Guid CreateBooking(Booking entity);
-        Booking GetBookingByBookingRef(Guid bookingID);
+        void ResetDatabase();
+        void ReSeedDatabase();
     }
 }
