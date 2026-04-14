@@ -187,6 +187,23 @@ Implemented using the **Repository Pattern** to ensure separation of concerns:
 
 ---
 
+## Automated Testing
+
+Basic automated tests have been implemented using **NUnit** for the repository layer.
+
+The focus of these tests was to validate:
+
+- Core booking logic  
+- Date overlap scenarios  
+- Edge cases and boundary conditions  
+- Invalid or unexpected inputs  
+
+These tests helped identify edge cases during development, some of which were initially handled at controller level and later moved into the repository layer for better separation of concerns.
+
+> Due to time constraints, testing has been limited to the repository layer, but this could be expanded to include service and integration testing in a production environment.
+
+---
+
 ## Use of AI
 
 AI was used to assist with generating unit tests for the repository layer.
@@ -200,7 +217,7 @@ AI was used to assist with generating unit tests for the repository layer.
 - 10 passed immediately  
 - 2 highlighted edge cases  
 
-These edge cases were initially handled at controller level, but were subsequently addressed within the repository layer to improve robustness.
+These edge cases were initially handled at controller level, but were subsequently addressed within the repository layer to improve robustness at speed.
 
 ---
 
