@@ -9,7 +9,7 @@
 
 The API is hosted on Azure (App Service) and can be accessed via:
 
-> **TBC**
+> **https://waracle-hotelbms-api-c9apf7d4akczfzb9.uksouth-01.azurewebsites.net//swagger/index.html**
 
 Once loaded, Swagger UI will be available for interacting with all endpoints.
 
@@ -132,6 +132,7 @@ Uses the same model as the availability search.
 - Finds a suitable available room  
 - Selects the closest match based on capacity  
 - Creates a booking with a unique GUID reference  
+- IMPORTANT! - The booking reference is returned in the response body, its worth noting this down for use in the /api/Hotels/bookings/{bookingRef} call.
 
 **Concurrency Handling:**
 - Re-checks availability immediately before saving  
@@ -187,6 +188,23 @@ Implemented using the **Repository Pattern** to ensure separation of concerns:
 
 ---
 
+## Automated Testing
+
+Basic automated tests have been implemented using **NUnit** for the repository layer.
+
+The focus of these tests was to validate:
+
+- Core booking logic  
+- Date overlap scenarios  
+- Edge cases and boundary conditions  
+- Invalid or unexpected inputs  
+
+These tests helped identify edge cases during development, some of which were initially handled at controller level and later moved into the repository layer for better separation of concerns.
+
+> Due to time constraints, testing has been limited to the repository layer, but this could be expanded to include service and integration testing in a production environment.
+
+---
+
 ## Use of AI
 
 AI was used to assist with generating unit tests for the repository layer.
@@ -200,7 +218,7 @@ AI was used to assist with generating unit tests for the repository layer.
 - 10 passed immediately  
 - 2 highlighted edge cases  
 
-These edge cases were initially handled at controller level, but were subsequently addressed within the repository layer to improve robustness.
+These edge cases were initially handled at controller level, but were subsequently addressed within the repository layer to improve robustness at speed.
 
 ---
 

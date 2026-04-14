@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Text.Json.Serialization;
 using HotelBMSData.Context;
 using HotelBMSRepository;
@@ -10,8 +10,22 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddDbContext<DataContext>(options =>
-    options.UseSqlite("Data Source=Data/hotels.db"));
+
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddDbContext<DataContext>(options =>
+        options.UseSqlite("Data Source=Data/hotels.db"));
+}
+else
+{
+    var dbPath = Path.Combine(
+        Environment.GetEnvironmentVariable("HOME") ?? "",
+        "site", "wwwroot", "hotels.db");
+
+    builder.Services.AddDbContext<DataContext>(options =>
+        options.UseSqlite($"Data Source={dbPath}"));
+}
 
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IHotelRepository, HotelRepository>();
@@ -30,15 +44,13 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
 var app = builder.Build();
+app.UseSwagger();
+app.UseSwaggerUI();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-
+if (builder.Environment.IsDevelopment())
+{  
     app.MapControllerRoute(
         name: "testreset",
         pattern: "api/Test/db/{action=reset}");
@@ -48,10 +60,27 @@ if (app.Environment.IsDevelopment())
         pattern: "api/Test/db/{action=seed}");
 }
 
+
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<DataContext>();
-    db.Database.EnsureCreated();
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<DataContext>();
+
+        var fullPath = db.Database.GetDbConnection().DataSource;
+        var directory = Path.GetDirectoryName(fullPath);
+
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        db.Database.EnsureCreated();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"DB Init failed: {ex.Message}");
+    }
 }
 
 app.UseHttpsRedirection();

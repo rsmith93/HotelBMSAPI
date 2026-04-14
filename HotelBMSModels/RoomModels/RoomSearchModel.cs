@@ -24,6 +24,7 @@ namespace HotelBMSModels.RoomModels
         
         [Required]
         [SwaggerSchema(Description = "Number of guests for the booking")]
+        [Range(1, 6)]
         public int NumberOfGuestsOnBooking { get; set; }
     }
 }
