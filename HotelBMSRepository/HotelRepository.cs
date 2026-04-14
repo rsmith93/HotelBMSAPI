@@ -21,9 +21,12 @@ namespace HotelBMSRepository
 
         public IQueryable<Hotel> GetHotelByName(string name)
         {
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentNullException("Name should not be null or empty");
+
             var hotels = dbContext.Hotels.AsNoTracking()
                 .Where(x => !x.Archived && 
-                            x.Name.ToLower().Trim().Contains(name))
+                            x.Name.ToLower().Trim().Contains(name.ToLower().Trim()))
                 .OrderBy(x => x.Name);
             return hotels;
         }
