@@ -22,7 +22,7 @@ namespace HotelBMSRepository
 
         public Booking GetBookingByBookingRef(Guid bookingRef)
         {
-            var booking = dbContext.Bookings.AsNoTracking().FirstOrDefault(x => x.BookingReference == bookingRef);
+            var booking = dbContext.Bookings.Include(x => x.Room).Include(x => x.Room.Hotel).AsNoTracking().FirstOrDefault(x => x.BookingReference == bookingRef);
             if (booking == null)
                 throw new Exception("Sorry, we could not find a booking to match your booking reference.");
             return booking;

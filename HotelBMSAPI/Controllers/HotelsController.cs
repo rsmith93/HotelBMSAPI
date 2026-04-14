@@ -14,10 +14,17 @@ namespace HotelBMSAPI.Controllers
 
         public HotelsController(IHotelBMSService _bmsService)
         {
-            _bmsService = bmsService;
+            bmsService = _bmsService;
         }
 
         [HttpGet("search")]
+        public IActionResult GetAllHotels()
+        {
+            var hotels = bmsService.GetAllAvailableHotels().ToList();
+            return Ok(hotels);
+        }
+
+        [HttpGet("searchbyname")]
         public IActionResult GetHotelsByName([FromQuery]string name)
         {
             if (String.IsNullOrEmpty(name))
@@ -34,7 +41,7 @@ namespace HotelBMSAPI.Controllers
             return Ok(booking);
         }
 
-        [HttpPost("bookings")]
+        [HttpPost("bookings/create")]
         public IActionResult CreateRoomBooking([FromBody]RoomSearchModel searchModel)
         {
             var bookingRef = bmsService.CreateRoomBooking(searchModel);

@@ -15,7 +15,6 @@ namespace HotelBMSData.Context
         {
         }
 
-
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<Hotel> Hotels { get; set; }
         public DbSet<Room> Rooms { get; set; }

@@ -15,14 +15,17 @@ namespace HotelBMSServices
         private readonly IBookingRepository bookingRepo;
         private readonly IHotelRepository hotelRepo;
         private readonly IRoomRepository roomRepo;
+        private readonly IDbSeedRepository seedRepo;
 
         public HotelBMSService(IBookingRepository _bookingRepo, 
             IHotelRepository _hotelRepo, 
-            IRoomRepository _roomRepo)
+            IRoomRepository _roomRepo,
+            IDbSeedRepository _seedRepo)
         {
             bookingRepo = _bookingRepo;
             hotelRepo = _hotelRepo;
             roomRepo = _roomRepo;
+            seedRepo = _seedRepo;
         }
 
 
@@ -51,6 +54,11 @@ namespace HotelBMSServices
             return roomRepo.GetHotelRoomsBySearchData(searchModel);
         }
 
+        public IQueryable<Hotel> GetAllAvailableHotels()
+        {
+            return hotelRepo.GetAllAvailableHotels();
+        }
+
         public IQueryable<Hotel> GetHotelByName(string name)
         {
             return hotelRepo.GetHotelByName(name.ToLower().Trim());
@@ -59,6 +67,16 @@ namespace HotelBMSServices
         public Booking GetBookingByBookingRef(Guid bookingRef)
         {
             return bookingRepo.GetBookingByBookingRef(bookingRef);
+        }
+
+        public void ReseedDatabase()
+        {
+            seedRepo.ReSeedDatabase();
+        }
+
+        public void ResetDatabase()
+        {
+            seedRepo.ResetDatabase();
         }
 
     }

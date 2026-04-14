@@ -12,7 +12,10 @@ namespace HotelBMSServices.Interfaces
     {
         Guid CreateRoomBooking(RoomSearchModel searchModel);
         IQueryable<Room> GetAvailableHotelRoomsBySearch(RoomSearchModel searchModel);
+        IQueryable<Hotel> GetAllAvailableHotels();
         IQueryable<Hotel> GetHotelByName(string name);
         Booking GetBookingByBookingRef(Guid bookingRef);
+        void ResetDatabase();
+        void ReseedDatabase();        
     }
 }

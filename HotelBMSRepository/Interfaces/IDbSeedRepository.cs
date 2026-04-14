@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using HotelBMSData.Entities;
 
 namespace HotelBMSRepository.Interfaces
 {
-    public interface IHotelRepository
+    public interface IDbSeedRepository
     {
-        IQueryable<Hotel> GetHotelByName(string name);
-        IQueryable<Hotel> GetAllAvailableHotels();
+        void ResetDatabase();
+        void ReSeedDatabase();
     }
 }

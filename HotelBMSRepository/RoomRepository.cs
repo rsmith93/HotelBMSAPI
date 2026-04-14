@@ -23,12 +23,15 @@ namespace HotelBMSRepository
         public IQueryable<Room> GetHotelRoomsBySearchData(RoomSearchModel searchModel)
         {
             if (searchModel.EndDate <= searchModel.StartDate)
-                throw new Exception("End date must be after start date, please update and try again");
+                throw new Exception("End date must be after start date, please update and try again.");
+
+            if (searchModel.StartDate.Date < DateTime.UtcNow.Date)
+                throw new Exception("Start date must be from today onwards, please update and try again.");
 
             //get all of the rooms associated with the chosen hotel
             //for the purposes of capacity, I'am treating this as the maximum number of guests a room can hold.
             //So the check is simply whether the room can accommodate the requested number of guests
-            IQueryable<Room> availableRooms = dbContext.Rooms.AsNoTracking()
+            IQueryable<Room> availableRooms = dbContext.Rooms.AsNoTracking().Include(x => x.Hotel)
                 .Where(x => !x.Archived && 
                        x.HotelID == searchModel.HotelID &&
                        x.Capacity >= searchModel.NumberOfGuestsOnBooking);

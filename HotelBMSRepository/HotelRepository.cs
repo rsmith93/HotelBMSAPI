@@ -28,9 +28,12 @@ namespace HotelBMSRepository
             return hotels;
         }
 
-        public IQueryable<Guid> GetExistigHotelIds()
+        public IQueryable<Hotel> GetAllAvailableHotels()
         {
-            return dbContext.Hotels.AsNoTracking().Select(x => x.ID);
+            var hotels = dbContext.Hotels.AsNoTracking()
+                .Where(x => !x.Archived)
+                .OrderBy(x => x.Name);
+            return hotels;
         }
 
     }
