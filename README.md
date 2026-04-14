@@ -9,7 +9,7 @@
 
 The API is hosted on Azure (App Service) and can be accessed via:
 
-> **TBC**
+> **https://waracle-hotelbms-api-c9apf7d4akczfzb9.uksouth-01.azurewebsites.net//swagger/index.html**
 
 Once loaded, Swagger UI will be available for interacting with all endpoints.
 
@@ -132,6 +132,7 @@ Uses the same model as the availability search.
 - Finds a suitable available room  
 - Selects the closest match based on capacity  
 - Creates a booking with a unique GUID reference  
+- IMPORTANT! - The booking reference is returned in the response body, its worth noting this down for use in the /api/Hotels/bookings/{bookingRef} call.
 
 **Concurrency Handling:**
 - Re-checks availability immediately before saving  
