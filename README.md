@@ -2,6 +2,7 @@
 
 **Lead Developer:** Ryan Smith  
 **Date:** 14/04/2026  
+**Tech:** .NET 8, EF Core, SQLite, Swagger  
 
 ---
 
@@ -19,11 +20,11 @@ Once loaded, Swagger UI will be available for interacting with all endpoints.
 
 1. Open Swagger UI  
 2. Reset the database:
-   - `POST /api/Test/db/reset`  
+   - `POST /api/db/reset`  
 3. Seed test data:
-   - `POST /api/Test/db/seed`  
+   - `POST /api/db/seed`  
 4. Retrieve a hotel:
-   - `GET /api/Hotels/search`  
+   - `GET /api/hotels`  
 5. Use the returned `HotelID` to:
    - Search available rooms  
    - Create a booking  
@@ -32,9 +33,7 @@ Once loaded, Swagger UI will be available for interacting with all endpoints.
 
 ## Test Endpoints
 
-> These endpoints are only available in **Development mode**
-
-### POST `/api/Test/db/reset`
+### POST `/api/db/reset`
 
 Clears all data from:
 - Hotels  
@@ -45,7 +44,7 @@ Clears all data from:
 
 ---
 
-### POST `/api/Test/db/seed`
+### POST `/api/db/seed`
 
 Recreates a base dataset for testing:
 - Adds 3 sample hotels  
@@ -55,36 +54,21 @@ Recreates a base dataset for testing:
 
 ## Hotels Controller
 
-### GET `/api/Hotels/search`
+### GET `/api/hotels`
 
-Returns all hotels in the system.
+Paginated, filterable, sortable list of hotels.
 
-**Why this exists:**
-- Allows discovery of `HotelID` values (GUIDs) for use in other endpoints  
+**Query parameters:**
+- `name` (optional)  
+- `page`, `pageSize`  
+- `sortBy`, `sortDesc`  
 
 **Design note:**
 - GUIDs are used to avoid predictable IDs and reduce the risk of enumeration in future secured implementations.
 
 ---
 
-### GET `/api/Hotels/search/name`
-
-Search for hotels by name.
-
-**Query Parameters:**
-
-| Parameter | Type | Description |
-|----------|------|-------------|
-| `name` | string | Required. Case-insensitive search |
-
-**Behaviour:**
-- Trims whitespace  
-- Converts input to lowercase for comparison  
-- Can return multiple results  
-
----
-
-### GET `/api/Hotels/bookings/{bookingRef}`
+### GET `/api/bookings/{bookingRef}`
 
 Retrieve booking details by reference.
 
@@ -101,7 +85,7 @@ Retrieve booking details by reference.
 
 ---
 
-### GET `/api/Hotels/bookings/available`
+### GET `/api/rooms/available`
 
 Returns all available rooms based on search criteria.
 
@@ -110,7 +94,7 @@ Returns all available rooms based on search criteria.
 | Parameter | Type | Description | Notes |
 |----------|------|-------------|---------|
 | `HotelID` | GUID | Retrieved via `/api/Hotels/search` |
-| `StartDate` | Date | Format: `yyyy-MM-dd` (e.g. 2026-04-14) | Must be at least todays date
+| `StartDate` | Date | Format: `yyyy-MM-dd` (e.g. 2026-04-14) |
 | `EndDate` | Date | Format: `yyyy-MM-dd` (e.g. 2026-04-21) | Must be after `StartDate` |
 | `NumberOfGuestsOnBooking` | int | Range: 1–6 |
 
@@ -121,35 +105,19 @@ Returns all available rooms based on search criteria.
 
 ---
 
-### POST `/api/Hotels/bookings/create`
+### POST `/api/bookings`
 
 Create a new booking.
-
-**Request Body:**
-Uses the same model as the availability search.
 
 **Behaviour:**
 - Finds a suitable available room  
 - Selects the closest match based on capacity  
 - Creates a booking with a unique GUID reference  
-- IMPORTANT! - The booking reference is returned in the response body, its worth noting this down for use in the /api/Hotels/bookings/{bookingRef} call.
-
-**Concurrency Handling:**
-- Re-checks availability immediately before saving  
-- Prevents race conditions where two users attempt to book the same room  
-
-> In a production system, this would be handled using database transactions or constraints.
+- IMPORTANT! - The booking reference is returned in the response body, its worth noting this down for use in the /api/bookings/{bookingRef} call.
 
 ---
 
 ## Design Decisions
-
-### Technology
-
-- Built using **.NET 8 (LTS)**  
-- Swagger included for API testing and documentation and to meet use case requirement
-
----
 
 ### Architecture
 
@@ -167,6 +135,31 @@ Implemented using the **Repository Pattern** to ensure separation of concerns:
 
 ---
 
+### DTO Based API
+ - Controllers return DTOs (not EF entities)
+ - Prevents over-fetching of unecessary data
+
+---
+
+### Queryable endpoints
+
+Supports:
+ - Filtering
+ - Sorting
+ - Pagination
+
+All executed at db level for efficiency
+
+---
+
+### Concurrency Protection
+
+- Booking availability checked within a transaction
+- Prevents double-booking under concurrent requests
+
+
+---
+
 ### Database
 
 - **SQLite** used for simplicity and fast setup  
@@ -179,12 +172,10 @@ Implemented using the **Repository Pattern** to ensure separation of concerns:
 ## Additional Considerations
 
 - Authentication not implemented  
-  - Would typically use **OAuth2** in production  
+  - Would typically use **OAuth2 or JWT** in production  
 
 - Error handling kept simple  
-  - Would normally be centralised via middleware , perhaps Elmah
-
-- API designed to be easily testable via Swagger  
+  - Would normally be centralised via middleware have utilised standard API responses
 
 ---
 
@@ -226,8 +217,7 @@ These edge cases were initially handled at controller level, but were subsequent
 
 If this were to be extended further:
 
-- Introduce authentication and authorisation (OAuth2)  
-- Implement database transactions for stronger concurrency control of bookings 
+- Introduce authentication and authorisation (OAuth2/ JWT)  
 - Expand test coverage beyond repository layer to the other repositories
 - Introduce global error handling middleware  
 - Add logging and monitoring  
