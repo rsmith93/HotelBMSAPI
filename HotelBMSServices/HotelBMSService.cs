@@ -36,7 +36,7 @@ namespace HotelBMSServices
         {
             var roomToBook = await roomRepo.IsRoomAvailable(model);
             if (roomToBook == null)
-                throw new Exception("Sorry, there are no available rooms matching your criteria");
+                throw new InvalidOperationException("Sorry, there are no available rooms matching your criteria");
 
             var newBookingRef = await bookingRepo.CreateBooking(new HotelBMSData.Entities.Booking()
             {
