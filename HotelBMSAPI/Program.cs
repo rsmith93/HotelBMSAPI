@@ -6,6 +6,7 @@ using HotelBMSRepository.Interfaces;
 using HotelBMSServices;
 using HotelBMSServices.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,23 +43,29 @@ builder.Services.AddControllers()
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.EnableAnnotations();
+    c.ExampleFilters();
+});
 
 var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
 // Configure the HTTP request pipeline.
-if (builder.Environment.IsDevelopment())
-{  
-    app.MapControllerRoute(
-        name: "testreset",
-        pattern: "api/Test/db/{action=reset}");
+//if (builder.Environment.IsDevelopment())
+//{  
+//    app.MapControllerRoute(
+//        name: "testreset",
+//        pattern: "api/Test/db/{action=reset}");
 
-    app.MapControllerRoute(
-        name: "testseed",
-        pattern: "api/Test/db/{action=seed}");
-}
+//    app.MapControllerRoute(
+//        name: "testseed",
+//        pattern: "api/Test/db/{action=seed}");
+//}
 
 
 using (var scope = app.Services.CreateScope())

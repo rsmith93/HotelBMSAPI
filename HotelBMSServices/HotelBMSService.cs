@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HotelBMSData.Entities;
+using HotelBMSModels.BaseModels;
+using HotelBMSModels.BookingModels;
+using HotelBMSModels.HotelModels;
 using HotelBMSModels.RoomModels;
 using HotelBMSRepository.Interfaces;
 using HotelBMSServices.Interfaces;
@@ -29,44 +32,89 @@ namespace HotelBMSServices
         }
 
 
-        public Guid CreateRoomBooking(RoomSearchModel searchModel)
+        public async Task<Guid> CreateRoomBooking(RoomBookingModel model)
         {
-            var roomToBook = roomRepo.IsRoomAvailable(searchModel);
+            var roomToBook = await roomRepo.IsRoomAvailable(model);
             if (roomToBook == null)
                 throw new Exception("Sorry, there are no available rooms matching your criteria");
 
-            var newBookingRef = bookingRepo.CreateBooking(new HotelBMSData.Entities.Booking()
+            var newBookingRef = await bookingRepo.CreateBooking(new HotelBMSData.Entities.Booking()
             {
                 Archived = false,
                 BookingReference = Guid.NewGuid(),
-                EndDate = searchModel.EndDate,
-                NumberOfGuests = searchModel.NumberOfGuestsOnBooking,
+                EndDate = model.EndDate,
+                NumberOfGuests = model.NumberOfGuestsOnBooking,
                 RoomID = roomToBook.ID,
-                StartDate = searchModel.StartDate,
+                StartDate = model.StartDate,
                 Timestamp = DateTime.UtcNow
             });   
             return newBookingRef;
         }
 
 
-        public IQueryable<Room> GetAvailableHotelRoomsBySearch(RoomSearchModel searchModel)
+        public async Task<List<RoomDTO>> GetAvailableHotelRoomsBySearch(RoomSearchModel searchModel)
         {
-            return roomRepo.GetHotelRoomsBySearchData(searchModel);
+            var rooms = await roomRepo.GetHotelRoomsBySearchData(searchModel);
+
+            return rooms.Select(x => new RoomDTO()
+            {
+                Capacity = x.Capacity,
+                HotelID = x.HotelID,
+                ID = x.ID,
+                Type = x.Type,
+                Hotel = new HotelBMSModels.HotelModels.HotelDTO()
+                {
+                    ID = x.Hotel.ID,
+                    Name = x.Hotel.Name
+                }
+            }).ToList();
         }
 
-        public IQueryable<Hotel> GetAllAvailableHotels()
+        public async Task<List<HotelDTO>> GetAllAvailableHotels()
         {
-            return hotelRepo.GetAllAvailableHotels();
+            var hotels = await hotelRepo.GetAllAvailableHotels();
+
+            return hotels.Select(x => new HotelDTO()
+            {
+                Name = x.Name,
+                ID = x.ID,
+            }).ToList();
         }
 
-        public IQueryable<Hotel> GetHotelByName(string name)
+        public async Task<PagedResult<HotelDTO>> GetHotels(HotelQueryModel query)
         {
-            return hotelRepo.GetHotelByName(name.ToLower().Trim());
+            return await hotelRepo.GetHotels(query);
         }
 
-        public Booking GetBookingByBookingRef(Guid bookingRef)
+        public async Task<BookingDTO?> GetBookingByBookingRef(Guid bookingRef)
         {
-            return bookingRepo.GetBookingByBookingRef(bookingRef);
+            var booking = await bookingRepo.GetBookingByBookingRef(bookingRef);
+
+            if (booking == null)
+                return null;
+
+            return new BookingDTO()
+            {
+                Archived = booking.Archived,
+                BookingReference = booking.BookingReference,
+                EndDate = booking.EndDate,
+                NumberOfGuests = booking.NumberOfGuests,
+                RoomID = booking.RoomID,
+                StartDate = booking.StartDate,
+                Timestamp = booking.Timestamp,
+                Room = new RoomDTO()
+                {
+                    Capacity = booking.Room.Capacity,
+                    Type = booking.Room.Type,
+                    HotelID = booking.Room.HotelID,
+                    ID = booking.Room.ID,
+                    Hotel = new HotelDTO()
+                    {
+                        ID = booking.Room.Hotel.ID,
+                        Name = booking.Room.Hotel.Name
+                    }
+                }
+            };
         }
 
         public void ReseedDatabase()
