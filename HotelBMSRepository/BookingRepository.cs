@@ -29,19 +29,23 @@ namespace HotelBMSRepository
         {
             await using var transaction = await dbContext.Database.BeginTransactionAsync();
 
-            var overlapExists = await dbContext.Bookings
+            var roomStillAvailable = !await dbContext.Bookings
+            .AsNoTracking()
             .AnyAsync(b =>
                 b.RoomID == entity.RoomID &&
                 b.StartDate < entity.EndDate &&
                 b.EndDate > entity.StartDate);
 
-            if (overlapExists)
-                throw new InvalidOperationException("Room already booked.");
+            if (!roomStillAvailable)
+                throw new InvalidOperationException(
+                    "Sorry, this room was just booked, please try again.");
 
             dbContext.Bookings.Add(entity);
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
-            return entity.BookingReference;            
+            await transaction.CommitAsync();
+
+            return entity.BookingReference;
         }
     }
 }
