@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using HotelBMSData.Context;
 using HotelBMSData.Entities;
+using HotelBMSModels.BaseModels;
+using HotelBMSModels.HotelModels;
 using HotelBMSRepository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,24 +21,52 @@ namespace HotelBMSRepository
             dbContext = _dbContext;
         }
 
-        public IQueryable<Hotel> GetHotelByName(string name)
+        public async Task<PagedResult<HotelDTO>> GetHotels(HotelQueryModel query)
         {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("Name should not be null or empty");
+            var dbQuery = dbContext.Hotels.AsNoTracking().Where(h => !h.Archived);
 
-            var hotels = dbContext.Hotels.AsNoTracking()
-                .Where(x => !x.Archived && 
-                            x.Name.ToLower().Trim().Contains(name.ToLower().Trim()))
-                .OrderBy(x => x.Name);
-            return hotels;
+            if (!string.IsNullOrWhiteSpace(query.Name))
+            {
+                var name = query.Name.Trim();
+                dbQuery = dbQuery.Where(h => EF.Functions.Like(h.Name, $"%{name}%"));
+            }
+
+            var totalCount = await dbQuery.CountAsync();
+
+            dbQuery = query.SortBy?.ToLower() switch
+            {
+                "name" => query.SortDesc
+                    ? dbQuery.OrderByDescending(h => h.Name)
+                    : dbQuery.OrderBy(h => h.Name),
+                    //DEFAULT
+                _ => dbQuery.OrderBy(h => h.Name)
+            };
+
+
+            var items = await dbQuery
+                .Skip((query.Page - 1) * query.PageSize)
+                .Take(query.PageSize)
+                .Select(h => new HotelDTO()
+                {
+                    ID = h.ID,  
+                    Name = h.Name,
+                })
+                .ToListAsync();
+
+            return new PagedResult<HotelDTO>
+            {
+                Items = items,
+                Page = query.Page,
+                PageSize = query.PageSize,
+                TotalCount = totalCount
+            };
         }
 
-        public IQueryable<Hotel> GetAllAvailableHotels()
+        public async Task<List<Hotel>> GetAllAvailableHotels()
         {
-            var hotels = dbContext.Hotels.AsNoTracking()
+            return await dbContext.Hotels.AsNoTracking()
                 .Where(x => !x.Archived)
-                .OrderBy(x => x.Name);
-            return hotels;
+                .OrderBy(x => x.Name).ToListAsync();
         }
 
     }

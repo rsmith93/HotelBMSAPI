@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HotelBMSData.Entities;
+using HotelBMSModels.BookingModels;
 using HotelBMSModels.RoomModels;
 
 namespace HotelBMSRepository.Interfaces
 {
     public interface IRoomRepository
     {
-        IQueryable<Room> GetHotelRoomsBySearchData(RoomSearchModel searchModel);
-        Room IsRoomAvailable(RoomSearchModel searchModel);
+        Task<List<Room>> GetHotelRoomsBySearchData(RoomSearchModel searchModel);
+        Task<Room?> IsRoomAvailable(RoomBookingModel searchModel);
     }
 }

@@ -4,12 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HotelBMSData.Entities;
+using HotelBMSModels.BaseModels;
+using HotelBMSModels.HotelModels;
 
 namespace HotelBMSRepository.Interfaces
 {
     public interface IHotelRepository
     {
-        IQueryable<Hotel> GetHotelByName(string name);
-        IQueryable<Hotel> GetAllAvailableHotels();
+        Task<PagedResult<HotelDTO>> GetHotels(HotelQueryModel query);
+        Task<List<Hotel>> GetAllAvailableHotels();
     }
 }

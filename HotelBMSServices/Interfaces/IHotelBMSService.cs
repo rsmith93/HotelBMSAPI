@@ -4,17 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HotelBMSData.Entities;
+using HotelBMSModels.BaseModels;
+using HotelBMSModels.BookingModels;
+using HotelBMSModels.HotelModels;
 using HotelBMSModels.RoomModels;
 
 namespace HotelBMSServices.Interfaces
 {
     public  interface IHotelBMSService
     {
-        Guid CreateRoomBooking(RoomSearchModel searchModel);
-        IQueryable<Room> GetAvailableHotelRoomsBySearch(RoomSearchModel searchModel);
-        IQueryable<Hotel> GetAllAvailableHotels();
-        IQueryable<Hotel> GetHotelByName(string name);
-        Booking GetBookingByBookingRef(Guid bookingRef);
+        Task<Guid> CreateRoomBooking(RoomBookingModel searchModel);
+        Task<List<RoomDTO>> GetAvailableHotelRoomsBySearch(RoomSearchModel searchModel);
+        Task<List<HotelDTO>> GetAllAvailableHotels();
+        Task<PagedResult<HotelDTO>> GetHotels(HotelQueryModel query);
+        Task<BookingDTO?> GetBookingByBookingRef(Guid bookingRef);
         void ResetDatabase();
         void ReseedDatabase();        
     }

@@ -1,10 +1,11 @@
 ﻿using HotelBMSServices.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace HotelBMSAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]/db")]
+    [Route("api/db")]
     public class TestController : ControllerBase
     {
         private readonly IHotelBMSService bmsService;
@@ -15,6 +16,9 @@ namespace HotelBMSAPI.Controllers
         }
 
         [HttpPost("reset")]
+        [SwaggerOperation(
+            Summary = "Resets the database to a blank state, removing all Hotels, Rooms and Bookings"
+        )]
         public IActionResult Reset()
         {
             bmsService.ResetDatabase();
@@ -22,6 +26,9 @@ namespace HotelBMSAPI.Controllers
         }
 
         [HttpPost("seed")]
+        [SwaggerOperation(
+            Summary = "Reseed the database back to default setting with standard test data"
+        )]
         public IActionResult Seed()
         {
             bmsService.ReseedDatabase();

@@ -1,13 +1,20 @@
 using System.Xml.Linq;
+using HotelBMSAPI.Helpers;
 using HotelBMSData.Entities;
+using HotelBMSModels.BaseModels;
+using HotelBMSModels.BookingModels;
+using HotelBMSModels.HotelModels;
 using HotelBMSModels.RoomModels;
 using HotelBMSServices.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Filters;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace HotelBMSAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api")]
     public class HotelsController : ControllerBase
     {
         private readonly IHotelBMSService bmsService;
@@ -17,41 +24,55 @@ namespace HotelBMSAPI.Controllers
             bmsService = _bmsService;
         }
 
-        [HttpGet("search")]
-        public IActionResult GetAllHotels()
+        [HttpGet("hotels")]
+        [SwaggerOperation(
+            Summary = "Get hotels with filtering, sorting, and pagination",
+            Description = "Supports filtering by name, sorting, and pagination"
+        )]
+        [SwaggerResponse(StatusCodes.Status200OK, "Hotels retrieved successfully", typeof(PagedResult<HotelDTO>))]
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(HotelPagedResultExample))]
+        public async Task<ActionResult<PagedResult<HotelDTO>>> GetHotels([FromQuery] HotelQueryModel query)
         {
-            var hotels = bmsService.GetAllAvailableHotels().ToList();
+            var hotels = await bmsService.GetHotels(query);
             return Ok(hotels);
         }
 
-        [HttpGet("searchbyname")]
-        public IActionResult GetHotelsByName([FromQuery]string name)
+        [HttpGet("bookings/{bookingRef:guid}")]
+        [SwaggerOperation(
+            Summary = "Get hotels bookings using a unique booking reference"
+        )]
+        [SwaggerResponse(StatusCodes.Status200OK, "Booking retrieved successfully", typeof(ActionResult<BookingDTO>))]
+        public async Task<ActionResult<BookingDTO>> GetBooking(Guid bookingRef)
         {
-            if (String.IsNullOrEmpty(name))
-                return BadRequest("Name is required to continue searching");
+            var booking = await bmsService.GetBookingByBookingRef(bookingRef);
+            if (booking == null)
+                return NotFound();
 
-            var hotels = bmsService.GetHotelByName(name).ToList();
-            return Ok(hotels);
-        }
-
-        [HttpGet("bookings/{bookingRef}")]
-        public IActionResult GetBookingByBookingRef(Guid bookingRef)
-        {
-            var booking = bmsService.GetBookingByBookingRef(bookingRef);
             return Ok(booking);
         }
 
-        [HttpPost("bookings/create")]
-        public IActionResult CreateRoomBooking([FromBody]RoomSearchModel searchModel)
+        [HttpPost("bookings")]
+        [SwaggerOperation(
+            Summary = "Create a booking at a hotel for available room only"
+        )]
+        public async Task<ActionResult> CreateBooking([FromBody] RoomBookingModel model)
         {
-            var bookingRef = bmsService.CreateRoomBooking(searchModel);
-            return Ok(new { message = $"Booking with reference {bookingRef} created successfully" });
+            var bookingRef = await bmsService.CreateRoomBooking(model);
+
+            return CreatedAtAction(
+                nameof(GetBooking),
+                new { bookingRef },
+                new { bookingRef }
+            );
         }
 
         [HttpGet("rooms/available")]
-        public IActionResult GetAvailableHotelRoomsBySearch([FromQuery] RoomSearchModel searchModel)
+        [SwaggerOperation(
+            Summary = "Check to see if rooms are available"
+        )]
+        public async Task<ActionResult<IEnumerable<RoomDTO>>> GetAvailableRooms([FromQuery] RoomSearchModel searchModel)
         {
-            var rooms = bmsService.GetAvailableHotelRoomsBySearch(searchModel).ToList();
+            var rooms = await bmsService.GetAvailableHotelRoomsBySearch(searchModel);
             return Ok(rooms);
         }
     }
