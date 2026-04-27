@@ -78,6 +78,12 @@ app.UseSwaggerUI();
 app.UseSerilogRequestLogging();
 app.UseStaticFiles();
 
+app.MapGet("/", context =>
+{
+    context.Response.Redirect("/swagger");
+    return Task.CompletedTask;
+});
+
 using (var scope = app.Services.CreateScope())
 {
     try
