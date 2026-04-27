@@ -1,0 +1,107 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Hotel BMS API Logs</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top:25px;
+        }
+
+        th, td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            text-align:left;
+        }
+
+        th {
+            background: #f4f4f4;
+        }
+
+        .info {
+            color: green;
+        }
+
+        .warning {
+            color: orange;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Hotel BMS API Logs</h2>
+
+    <p><i>Logs refresh automatically every 60 seconds.</i></p>
+
+    <p>To filter logs, use the below search options and then click the 'Filter' button.</p>
+
+    <select id="level">
+        <option value="">All</option>
+        <option value="Information">Information</option>
+        <option value="Warning">Warning</option>
+        <option value="Error">Error</option>
+    </select>
+
+    <input type="date" id="from">
+    <input type="date" id="to">
+
+    <button onclick="loadLogs()">Filter</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Level</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        <tbody id="logsTable"></tbody>
+    </table>
+
+    <script>
+
+        async function loadLogs() {
+            const level = document.getElementById('level').value;
+            const from = document.getElementById('from').value;
+            const to = document.getElementById('to').value;
+
+            let url = `/api/logs?page=1&pageSize=50`;
+
+            if (level) url += `&level=${level}`;
+            if (from) url += `&from=${from}`;
+            if (to) url += `&to=${to}`;
+
+            const res = await fetch(url);
+            const logs = await res.json();
+
+            const table = document.getElementById('logsTable');
+            table.innerHTML = '';
+
+            logs.forEach(log => {
+                const row = document.createElement('tr');
+
+                row.innerHTML = `
+                        <td>${new Date(log.timestamp).toLocaleString()}</td>
+                        <td class="${log.level.toLowerCase()}">${log.level}</td>
+                        <td>${log.renderedMessage}</td>
+                    `;
+
+                table.appendChild(row);
+            });
+        }
+
+        loadLogs();
+        setInterval(loadLogs, 60000);
+    </script>
+</body>
+</html>
