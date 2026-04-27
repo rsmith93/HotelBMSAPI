@@ -10,7 +10,11 @@
 
 The API is hosted on Azure (App Service) and can be accessed via:
 
-> **https://waracle-hotelbms-api-c9apf7d4akczfzb9.uksouth-01.azurewebsites.net//swagger/index.html**
+> **https://waracle-hotelbms-api-c9apf7d4akczfzb9.uksouth-01.azurewebsites.net/swagger/index.html**
+>
+> The logs dashboard can be accessed via:
+>
+> **https://waracle-hotelbms-api-c9apf7d4akczfzb9.uksouth-01.azurewebsites.net/logs.html**
 
 Once loaded, Swagger UI will be available for interacting with all endpoints.
 
@@ -20,9 +24,9 @@ Once loaded, Swagger UI will be available for interacting with all endpoints.
 
 1. Open Swagger UI  
 2. Reset the database:
-   - `POST /api/db/reset`  
+   - `POST /api/dbReset`  
 3. Seed test data:
-   - `POST /api/db/seed`  
+   - `POST /api/dbSeed`  
 4. Retrieve a hotel:
    - `GET /api/hotels`  
 5. Use the returned `HotelID` to:
@@ -214,7 +218,7 @@ These edge cases were initially handled at controller level, but were subsequent
 
 ## Logging 
 
-A simple logging system has been added to the API to improve debugging, traceability, and production readiness.
+A simple logging system has been added to the API to improve debugging, traceability, and production readiness. For the purposes of this demo it is available openly but in production this would be secured using an Admin role and authentication.
 
 ### What was added
 
