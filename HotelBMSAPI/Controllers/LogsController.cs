@@ -3,6 +3,7 @@ using HotelBMSData.Entities;
 using HotelBMSModels.LogModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace HotelBMSAPI.Controllers
 {
@@ -18,6 +19,9 @@ namespace HotelBMSAPI.Controllers
         }
 
         [HttpGet]
+        [SwaggerOperation(
+            Summary = "Allows API logs to be queried and retreived."
+        )]
         public async Task<ActionResult<List<LogEntry>>> GetLogs(
             [FromQuery] string? level,
             [FromQuery] DateTime? from,

@@ -6,6 +6,7 @@
         body {
             font-family: Arial;
             padding: 20px;
+            background:#fff;
         }
 
         table {
@@ -21,27 +22,46 @@
         }
 
         th {
-            background: #f4f4f4;
+            background: #000;
+            color:#fff;
         }
 
-        .info {
-            color: green;
+        table tr {
+            background: rgb(233, 222, 216);
+            border-bottom:2px solid #000;
+        }
+
+            table tr:nth-of-type(2n+1) {
+                background: rgb(227, 214, 208);
+            }
+
+        .levelPills {
+            padding: 5px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 10px;
+            display: block;
+        }
+
+        .information {
+            background: green;
+            color: white;
         }
 
         .warning {
-            color: orange;
+            background: #f93b02;
+            color: black;
         }
 
         .error {
-            color: red;
+            background: #cc3300;
+            color: white;
         }
     </style>
 </head>
 <body>
 
     <h2>Hotel BMS API Logs</h2>
-
-    <p><i>Logs refresh automatically every 60 seconds.</i></p>
 
     <p>To filter logs, use the below search options and then click the 'Filter' button.</p>
 
@@ -92,7 +112,7 @@
 
                 row.innerHTML = `
                         <td>${new Date(log.timestamp).toLocaleString()}</td>
-                        <td class="${log.level.toLowerCase()}">${log.level}</td>
+                        <td class="${log.level.toLowerCase()} levelPills">${log.level}</td>
                         <td>${log.renderedMessage}</td>
                     `;
 
@@ -101,7 +121,6 @@
         }
 
         loadLogs();
-        setInterval(loadLogs, 60000);
     </script>
 </body>
 </html>
