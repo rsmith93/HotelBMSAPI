@@ -33,7 +33,7 @@ Once loaded, Swagger UI will be available for interacting with all endpoints.
 
 ## Test Endpoints
 
-### POST `/api/db/reset`
+### POST `/api/dbReset`
 
 Clears all data from:
 - Hotels  
@@ -44,7 +44,7 @@ Clears all data from:
 
 ---
 
-### POST `/api/db/seed`
+### POST `/api/dbSeed`
 
 Recreates a base dataset for testing:
 - Adds 3 sample hotels  
@@ -157,7 +157,6 @@ All executed at db level for efficiency
 - Booking availability checked within a transaction
 - Prevents double-booking under concurrent requests
 
-
 ---
 
 ### Database
@@ -213,13 +212,49 @@ These edge cases were initially handled at controller level, but were subsequent
 
 ---
 
+## Logging 
+
+A simple logging system has been added to the API to improve debugging, traceability, and production readiness.
+
+### What was added
+
+- **Structured logging using Serilog**
+  - Replaced basic logging with structured logs for better traceability and querying.
+  - Logs include enriched metadata such as machine name and thread ID.
+
+- **Separate SQLite logging db**
+  - Logs are stored in a dedicated `logs.db` database, separate from the main application database.
+  - Prevents performance impact and keeps business data and logs isolated.
+
+- **Request logging middleware**
+  - All API requests are automatically logged, including:
+    - Request path
+    - HTTP method
+    - Status code
+    - Response time (via Serilog request logging)
+
+- **Service-level business logging**
+  - Key business actions are logged (e.g. booking creation, room searches).
+  - Includes structured contextual data such as RoomId, BookingReference, dates, and guest counts.
+
+- **Logs API endpoint**
+  - A new endpoint exposes logs for inspection and debugging:
+    - Supports pagination
+    - Filters by log level (Information, Warning, Error)
+    - Filters by date range (from/to)
+
+- **Simple logs dashboard**
+  - A lightweight UI was added to view logs in real time.
+  - Includes basic filtering and auto-refresh functionality.
+  - Accessible via /logs.html
+
+---
+
 ## Future Improvements
 
 If this were to be extended further:
 
 - Introduce authentication and authorisation (OAuth2/ JWT)  
 - Expand test coverage beyond repository layer to the other repositories
-- Introduce global error handling middleware  
-- Add logging and monitoring  
 
 ---
