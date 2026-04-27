@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HotelBMSHelpers\HotelBMSHelpers.csproj" />
+    <ProjectReference Include="..\HotelBMSModels\HotelBMSModels.csproj" />
   </ItemGroup>
 
 </Project>

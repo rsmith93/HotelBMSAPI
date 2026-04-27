@@ -6,17 +6,21 @@ using HotelBMSRepository.Interfaces;
 using HotelBMSServices;
 using HotelBMSServices.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+var logPath = string.Empty;
 
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddDbContext<DataContext>(options =>
         options.UseSqlite("Data Source=Data/hotels.db"));
+
+    logPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "logs.db");
 }
 else
 {
@@ -24,9 +28,14 @@ else
         Environment.GetEnvironmentVariable("HOME") ?? "",
         "site", "wwwroot", "hotels.db");
 
+    logPath = Path.Combine(Environment.GetEnvironmentVariable("HOME") ?? "", "site", "wwwroot", "logs.db");
+
     builder.Services.AddDbContext<DataContext>(options =>
         options.UseSqlite($"Data Source={dbPath}"));
 }
+
+builder.Services.AddDbContext<LogsContext>(options =>
+    options.UseSqlite($"Data Source={logPath}"));
 
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IHotelRepository, HotelRepository>();
@@ -51,22 +60,23 @@ builder.Services.AddSwaggerGen(c =>
     c.ExampleFilters();
 });
 
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .Enrich.FromLogContext()
+    .Enrich.WithMachineName()
+    .Enrich.WithThreadId()
+    .WriteTo.Console()
+    .WriteTo.SQLite(logPath)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
+
 var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
-
-// Configure the HTTP request pipeline.
-//if (builder.Environment.IsDevelopment())
-//{  
-//    app.MapControllerRoute(
-//        name: "testreset",
-//        pattern: "api/Test/db/{action=reset}");
-
-//    app.MapControllerRoute(
-//        name: "testseed",
-//        pattern: "api/Test/db/{action=seed}");
-//}
-
+app.UseSerilogRequestLogging();
+app.UseStaticFiles();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -96,6 +106,12 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
-
+try
+{
+    app.Run();
+}
+finally
+{
+    Log.CloseAndFlush();
+}
 

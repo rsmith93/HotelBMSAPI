@@ -5,7 +5,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace HotelBMSAPI.Controllers
 {
     [ApiController]
-    [Route("api/db")]
+    [Route("api/")]
     public class TestController : ControllerBase
     {
         private readonly IHotelBMSService bmsService;
@@ -15,7 +15,7 @@ namespace HotelBMSAPI.Controllers
             bmsService = _bmsService;
         }
 
-        [HttpPost("reset")]
+        [HttpPost("dbReset")]
         [SwaggerOperation(
             Summary = "Resets the database to a blank state, removing all Hotels, Rooms and Bookings"
         )]
@@ -25,7 +25,7 @@ namespace HotelBMSAPI.Controllers
             return Ok("Database has been reset.");
         }
 
-        [HttpPost("seed")]
+        [HttpPost("dbSeed")]
         [SwaggerOperation(
             Summary = "Reseed the database back to default setting with standard test data"
         )]
