@@ -6,29 +6,29 @@
         body {
             font-family: Arial;
             padding: 20px;
-            background:#fff;
+            background: #fff;
         }
 
         table {
             border-collapse: collapse;
             width: 100%;
-            margin-top:25px;
+            margin-top: 25px;
         }
 
         th, td {
             padding: 8px;
             border-bottom: 1px solid #ddd;
-            text-align:left;
+            text-align: left;
         }
 
         th {
             background: #000;
-            color:#fff;
+            color: #fff;
         }
 
         table tr {
             background: rgb(233, 222, 216);
-            border-bottom:2px solid #000;
+            border-bottom: 2px solid #000;
         }
 
             table tr:nth-of-type(2n+1) {
@@ -54,8 +54,30 @@
         }
 
         .error {
-            background: #cc3300;
+            background: red;
             color: white;
+        }
+
+        input, select {
+            line-height: 30px;
+        }
+
+        select {
+            height: 36px;
+        }
+
+        button {
+            background-color: #000;
+            border-radius: 40px;
+            color: #fff;
+            display: inline-block;
+            font-size: 13px;
+            padding: 10px 20px;
+            transition: transform .3s ease;
+            font-weight: 300;
+            text-align: center;
+            width: 110px;
+            margin-left: 15px;
         }
     </style>
 </head>
@@ -74,6 +96,7 @@
 
     <input type="date" id="from">
     <input type="date" id="to">
+    <input type="text" id="message" style="width:280px;" placeholder="Enter text contained within a Message to filter.">
 
     <button onclick="loadLogs()">Filter</button>
 
@@ -94,12 +117,14 @@
             const level = document.getElementById('level').value;
             const from = document.getElementById('from').value;
             const to = document.getElementById('to').value;
+            const message = document.getElementById('message').value;
 
             let url = `/api/logs?page=1&pageSize=50`;
 
             if (level) url += `&level=${level}`;
             if (from) url += `&from=${from}`;
             if (to) url += `&to=${to}`;
+            if (message) url += `&message=${message}`;
 
             const res = await fetch(url);
             const logs = await res.json();
@@ -111,10 +136,10 @@
                 const row = document.createElement('tr');
 
                 row.innerHTML = `
-                        <td>${new Date(log.timestamp).toLocaleString()}</td>
-                        <td class="${log.level.toLowerCase()} levelPills">${log.level}</td>
-                        <td>${log.renderedMessage}</td>
-                    `;
+                                <td>${new Date(log.timestamp).toLocaleString()}</td>
+                                <td class="${log.level.toLowerCase()} levelPills">${log.level}</td>
+                                <td>${log.message}</td>
+                            `;
 
                 table.appendChild(row);
             });

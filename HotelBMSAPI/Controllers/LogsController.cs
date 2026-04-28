@@ -45,6 +45,13 @@ namespace HotelBMSAPI.Controllers
                     paramIndex++;
                 }
 
+                if (!string.IsNullOrWhiteSpace(searchModel.Message))
+                {
+                    query += $" AND Exception LIKE @p{paramIndex} OR RenderedMessage LIKE @p{paramIndex}";
+                    parameters.Add($"%{searchModel.Message}%");
+                    paramIndex++;
+                }
+
                 if (searchModel.From.HasValue)
                 {
                     query += $" AND Timestamp >= @p{paramIndex}";
