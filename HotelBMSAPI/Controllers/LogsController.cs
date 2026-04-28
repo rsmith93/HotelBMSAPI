@@ -3,6 +3,7 @@ using HotelBMSData.Entities;
 using HotelBMSModels.LogModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace HotelBMSAPI.Controllers
@@ -22,43 +23,55 @@ namespace HotelBMSAPI.Controllers
         [SwaggerOperation(
             Summary = "Allows API logs to be queried and retreived."
         )]
-        public async Task<ActionResult<List<LogEntry>>> GetLogs(
-            [FromQuery] string? level,
-            [FromQuery] DateTime? from,
-            [FromQuery] DateTime? to,
+        public async Task<ActionResult<List<LogDTO>>> GetLogs(
+            [FromQuery] LogSearchDTO searchModel,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 50)
         {
             var query = @"
                 SELECT Timestamp, Level, RenderedMessage, Exception
-                FROM Logs";
+                FROM Logs
+                WHERE 1 = 1";
 
             var parameters = new List<object>();
+            int paramIndex = 0;
 
-            if (!string.IsNullOrWhiteSpace(level))
+            if (searchModel != null)
             {
-                query += " AND Level = {0}";
-                parameters.Add(level);
+                if (!string.IsNullOrWhiteSpace(searchModel.Level))
+                {
+                    query += $" AND Level LIKE @p{paramIndex}";
+                    parameters.Add($"%{searchModel.Level}%");
+                    paramIndex++;
+                }
+
+                if (searchModel.From.HasValue)
+                {
+                    query += $" AND Timestamp >= @p{paramIndex}";
+                    parameters.Add(searchModel.From.Value);
+                    paramIndex++;
+                }
+
+                if (searchModel.To.HasValue)
+                {
+                    query += $" AND Timestamp <= @p{paramIndex}";
+                    parameters.Add(searchModel.To.Value);
+                    paramIndex++;
+                }
             }
 
-            if (from.HasValue)
-            {
-                query += $" AND Timestamp >= {{{parameters.Count}}}";
-                parameters.Add(from.Value);
-            }
-
-            if (to.HasValue)
-            {
-                query += $" AND Timestamp <= {{{parameters.Count}}}";
-                parameters.Add(to.Value);
-            }
-
-            query += $" ORDER BY Timestamp DESC LIMIT {{{parameters.Count}}} OFFSET {{{parameters.Count + 1}}}";
+            query += $" ORDER BY Timestamp DESC LIMIT @p{paramIndex} OFFSET @p{paramIndex + 1}";
             parameters.Add(pageSize);
             parameters.Add((page - 1) * pageSize);
 
             var logs = await context.Logs
-                .FromSqlRaw(query, parameters.ToArray())
+                .FromSqlRaw(query, parameters.ToArray()).Select(x => new LogDTO()
+                {
+                    Exception = x.Exception,
+                    Level = x.Level,
+                    Message = x.RenderedMessage,
+                    Timestamp = x.Timestamp
+                })
                 .ToListAsync();
 
             return Ok(logs);
